@@ -1,18 +1,81 @@
-# Vim Markdown
+# `vim-albatross`
+## Introduction
+This repository contains a forked version of [plasticboy's `vim-markdown`](https://github.com/plasticboy/vim-markdown) which contains additional functionality for making it eaiser to work with Albatross.
 
-[![Build Status](https://travis-ci.org/plasticboy/vim-markdown.svg)](https://travis-ci.org/plasticboy/vim-markdown)
+![Example usage of vim-albatross](media/example.gif)
+
+## Installation
+This plugin relies on the command line tool part of [`go-albatross`](https://github.com/albatross-org/go-albatross/tree/master/cmd/albatross). If it hasn't already been installed, see the [installation instructions](https://github.com/albatross-org/go-albatross/tree/master/cmd/albatross#setup)
+
+You can check if a working version of `go-albatross` is installed if the command `albatross vim` has output.
+
+### Vundle
+In your `~/.vimrc`:
+
+```vim
+Plugin 'godlygeek/tabular'
+Plugin 'plasticboy/vim-markdown'
+```
+
+### [`vim-plug`](https://github.com/junegunn/vim-plug)
+
+```
+call plug#begin('...')
+    " ... other plugins ...
+
+    Plugin 'godlygeek/tabular'
+    Plugin 'plasticboy/vim-markdown'
+
+    " ... other plugins ...
+call plug#end()
+```
+
+## Usage
+Open an entry like you normally do using Albatross:
+
+```sh
+$ albatross get -p path/to/entry
+```
+
+## Features
+- [X] Open entries in a new tab using the `gx` command.
+- [X] Syntax highlighting of all types of links: `[[Links by Titles]]`, `{{links/by/paths}}`, `[[Links by Title](with link text)]`, `{{links/by/path}(with link text)}`
+- [X] Syntax highlihgting for all types of tags: `@?tag` and `@!tag` 
+- [ ] See backlinks to the current entry.
+- [ ] Open a completely new entry without having to link to it (ideally like [`fzf-vim`](https://github.com/junegunn/fzf.vim))
+- [ ] Create a new entry from within Vim.
+- [ ] Customise the Albatross command used internally to allow different stores.
+
+## Bugs
+- [ ] I'm not very good with Vimscript which is the biggest reason this is a fork rather than a plugin from the ground up. It's very messy and not idiomatic at all.
+- [ ] Links aren't parsed quite correctly, edge cases like `[[Entry With (Brackets in Name)]]` and links with different link text aren't parsed quite right, though the syntax is highlighted correctly.
+
+## How it Works
+The Albatross client isn't actually implemented in Vimscript -- it communicates with `go-albatross` through the `albatross vim` command. For more information on how it works, see `albatross vim --help`.
+
+Here's what differs from the original:
+
+|File|What|
+|----|----|
+|`syntax/markdown.vim`|Support for links and tags being highlighted.|
+|`ftplugin/markdown.vim`| Mainly `s:OpenUrlUnderCursor()` to add support for opening entry links. This needs refactoring.|
+
+Additions and modifications made to the original are easy to find by searching for "`Albatross`" since it appears in comments. 
+
+## Vim Markdown
+The complete, original README of [plasticboy's `vim-markdown`](https://github.com/plasticboy/vim-markdown) is below.
 
 Syntax highlighting, matching rules and mappings for [the original Markdown](http://daringfireball.net/projects/markdown/) and extensions.
 
 1. [Installation](#installation)
-1. [Basic usage](#basic-usage)
-1. [Options](#options)
-1. [Mappings](#mappings)
-1. [Commands](#commands)
-1. [Credits](#credits)
-1. [License](#license)
+2. [Basic usage](#basic-usage)
+3. [Options](#options)
+4. [Mappings](#mappings)
+5. [Commands](#commands)
+6. [Credits](#credits)
+7. [License](#license)
 
-## Installation
+### Installation
 
 If you use [Vundle](https://github.com/gmarik/vundle), add the following lines to your `~/.vimrc`:
 
@@ -53,9 +116,9 @@ cd ~/.vim
 tar --strip=1 -zxf vim-markdown-master.tar.gz
 ```
 
-## Basic usage
+### Basic usage
 
-### Folding
+#### Folding
 
 Folding is enabled for headers by default.
 
@@ -74,7 +137,7 @@ The following commands are useful to open and close folds:
 
 Try `:help fold-expr` and `:help fold-commands` for details.
 
-### Concealing
+#### Concealing
 
 Concealing is set for some syntax such as bold, italic, code block and link.
 
@@ -84,9 +147,9 @@ Concealing lets you conceal text with other text. The actual source text is not 
 
 Try `:help concealcursor` and `:help conceallevel` for details.
 
-## Options
+### Options
 
-### Disable Folding
+#### Disable Folding
 
 -   `g:vim_markdown_folding_disabled`
 
@@ -100,7 +163,7 @@ Try `:help concealcursor` and `:help conceallevel` for details.
 
         set [no]foldenable
 
-### Change fold style
+#### Change fold style
 
 -   `g:vim_markdown_folding_style_pythonic`
 
@@ -117,7 +180,7 @@ Try `:help concealcursor` and `:help conceallevel` for details.
 
         let g:vim_markdown_override_foldtext = 0
 
-### Set header folding level
+#### Set header folding level
 
 -   `g:vim_markdown_folding_level`
 
@@ -130,7 +193,7 @@ Try `:help concealcursor` and `:help conceallevel` for details.
         :let g:vim_markdown_folding_level = 1
         :edit
 
-### Disable Default Key Mappings
+#### Disable Default Key Mappings
 
 -   `g:vim_markdown_no_default_key_mappings`
 
@@ -140,7 +203,7 @@ Try `:help concealcursor` and `:help conceallevel` for details.
 
     You can also map them by yourself with `<Plug>` mappings.
 
-### Enable TOC window auto-fit
+#### Enable TOC window auto-fit
 
 -   `g:vim_markdown_toc_autofit`
 
@@ -149,7 +212,7 @@ Try `:help concealcursor` and `:help conceallevel` for details.
 
         let g:vim_markdown_toc_autofit = 1
 
-### Text emphasis restriction to single-lines
+#### Text emphasis restriction to single-lines
 
 -   `g:vim_markdown_emphasis_multiline`
 
@@ -157,7 +220,7 @@ Try `:help concealcursor` and `:help conceallevel` for details.
 
         let g:vim_markdown_emphasis_multiline = 0
 
-### Syntax Concealing
+#### Syntax Concealing
 
 -   `g:vim_markdown_conceal`
 
@@ -187,7 +250,7 @@ Try `:help concealcursor` and `:help conceallevel` for details.
 
         let g:vim_markdown_conceal_code_blocks = 0
 
-### Fenced code block languages
+#### Fenced code block languages
 
 -   `g:vim_markdown_fenced_languages`
 
@@ -204,7 +267,7 @@ Try `:help concealcursor` and `:help conceallevel` for details.
 
     Default is `['c++=cpp', 'viml=vim', 'bash=sh', 'ini=dosini']`.
 
-### Follow named anchors
+#### Follow named anchors
 
 -   `g:vim_markdown_follow_anchor`
 
@@ -235,11 +298,11 @@ Try `:help concealcursor` and `:help conceallevel` for details.
 
     Default is `''`.
 
-### Syntax extensions
+#### Syntax extensions
 
 The following options control which syntax extensions will be turned on. They are off by default.
 
-#### LaTeX math
+##### LaTeX math
 
 -   `g:vim_markdown_math`
 
@@ -247,7 +310,7 @@ The following options control which syntax extensions will be turned on. They ar
 
         let g:vim_markdown_math = 1
 
-#### YAML Front Matter
+##### YAML Front Matter
 
 -   `g:vim_markdown_frontmatter`
 
@@ -255,7 +318,7 @@ The following options control which syntax extensions will be turned on. They ar
 
         let g:vim_markdown_frontmatter = 1
 
-#### TOML Front Matter
+##### TOML Front Matter
 
 -   `g:vim_markdown_toml_frontmatter`
 
@@ -265,7 +328,7 @@ The following options control which syntax extensions will be turned on. They ar
 
         let g:vim_markdown_toml_frontmatter = 1
 
-#### JSON Front Matter
+##### JSON Front Matter
 
 -   `g:vim_markdown_json_frontmatter`
 
@@ -275,7 +338,7 @@ The following options control which syntax extensions will be turned on. They ar
 
         let g:vim_markdown_json_frontmatter = 1
 
-#### Strikethrough
+##### Strikethrough
 
 -   `g:vim_markdown_strikethrough`
 
@@ -283,7 +346,7 @@ The following options control which syntax extensions will be turned on. They ar
 
         let g:vim_markdown_strikethrough = 1
 
-### Adjust new list item indent
+#### Adjust new list item indent
 
 -   `g:vim_markdown_new_list_item_indent`
 
@@ -300,7 +363,7 @@ The following options control which syntax extensions will be turned on. They ar
 
         let g:vim_markdown_new_list_item_indent = 2
 
-### Do not require .md extensions for Markdown links
+#### Do not require .md extensions for Markdown links
 
 -   `g:vim_markdown_no_extensions_in_markdown`
 
@@ -312,7 +375,7 @@ The following options control which syntax extensions will be turned on. They ar
 
     Normal behaviour would be that vim-markup required you to do this `[link text](link-url.md)`, but this is not how the Gitlab and GitHub wiki repositories work. So this option adds some consistency between the two.
 
-### Auto-write when following link
+#### Auto-write when following link
 
 -   `g:vim_markdown_autowrite`
 
@@ -320,7 +383,7 @@ The following options control which syntax extensions will be turned on. They ar
 
         let g:vim_markdown_autowrite = 1
 
-### Change default file extension
+#### Change default file extension
 
 -   `g:vim_markdown_auto_extension_ext`
 
@@ -328,7 +391,7 @@ The following options control which syntax extensions will be turned on. They ar
 
         let g:vim_markdown_auto_extension_ext = 'txt'
 
-### Do not automatically insert bulletpoints
+#### Do not automatically insert bulletpoints
 
 -   `g:vim_markdown_auto_insert_bullets`
 
@@ -342,7 +405,7 @@ The following options control which syntax extensions will be turned on. They ar
 
         let g:vim_markdown_new_list_item_indent = 0
 
-### Change how to open new files
+#### Change how to open new files
 
 -   `g:vim_markdown_edit_url_in`
 
@@ -350,7 +413,7 @@ The following options control which syntax extensions will be turned on. They ar
 
         let g:vim_markdown_edit_url_in = 'tab'
 
-## Mappings
+### Mappings
 
 The following work on normal and visual modes:
 
@@ -394,7 +457,7 @@ To disable a map use:
 
     map <Plug> <Plug>Markdown_MoveToParentHeader
 
-## Commands
+### Commands
 
 The following requires `:filetype plugin on`.
 
@@ -439,7 +502,7 @@ The following requires `:filetype plugin on`.
 
 -   `:InsertNToc`: Same as `:InsertToc`, but the format of `h2` headers in the table of contents is a numbered list, rather than a bulleted list.
 
-## Credits
+### Credits
 
 The main contributors of vim-markdown are:
 
@@ -447,7 +510,7 @@ The main contributors of vim-markdown are:
 
 If you feel that your name should be on this list, please make a pull request listing your contributions.
 
-## License
+### License
 
 The MIT License (MIT)
 

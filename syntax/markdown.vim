@@ -116,6 +116,111 @@ syn match  mkdRule         /^\s*\*\s\{0,1}\*\s\{0,1}\*\(\*\|\s\)*$/
 syn match  mkdRule         /^\s*-\s\{0,1}-\s\{0,1}-\(-\|\s\)*$/
 syn match  mkdRule         /^\s*_\s\{0,1}_\s\{0,1}_\(_\|\s\)*$/
 
+" ---------------------------
+" Albatross Stuff starts here
+" ---------------------------
+
+" I've spent a while trying to figure this out and I think I've got it. I was confused as to why something like
+"
+"  syntax keyword albatrossLink legumes
+"  highlight link albatrossLink Statement
+"
+" Wouldn't work. I'm pretty sure vim-markdown (understandably) has some pretty wide-reaching syntax rules like the one for mkdNonListItemBlock,
+" so as long as that matches, the specific syntax that I describe here won't work. Therefore, for any syntax rules to play nicely with vim-markdown
+" means the syntax groups also need to be in the @mkdNonListItem cluster which is in "contains=" stuff like mkdNonListItemBlock.
+"
+" To get around this problem, I've defined a new syntax cluster which contains all the custom Albatross rules. This is then added once to the
+" @mkdNonListItem. This is probably very poorly explained -- I barely understand it myself.
+
+" Links
+" -----
+
+" Plain links:
+" Link by title, e.g. "[[Pizza]]"
+syntax region albatrossLinkNoName start=/\[\[/ end=/\]\]/ oneline
+highlight link albatrossLinkNoName htmlLink
+
+" Link by path, e.g. "{{food/pizza}}"
+syntax region albatrossLinkPathNoName start=/{{/ end=/}}/ oneline
+highlight link albatrossLinkPathNoName htmlLink
+
+" Links with names:
+" Link by title with name, e.g. "[[Pizza](Alternate name)]"
+syntax region albatrossLinkWithNameEntry matchgroup=albatrossLinkWithName start=/\[/ end=/\]/ oneline contained containedin=albatrossLinkWithName
+syntax region albatrossLinkWithNameTitle matchgroup=albatrossLinkWithName start="(" end=")" oneline contained containedin=albatrossLinkWithName
+syntax region albatrossLinkWithName start=/\[/ end=/)\]/ oneline keepend contains=albatrossLinkWithNameEntry,albatrossLinkWithName
+
+highlight link albatrossLinkWithNameEntry Underlined
+highlight link albatrossLinkWithNameTitle Underlined
+highlight link albatrossLinkWithName Underlined
+
+" Link by path with name, e.g. "{{food/pizza}(Pizza)}"
+syntax region albatrossLinkPathWithNameEntry matchgroup=albatrossLinkPathWithName start=/{/ end=/}/ oneline contained containedin=albatrossLinkPathWithName
+syntax region albatrossLinkPathWithNameTitle matchgroup=albatrossLinkPathWithName start="(" end=")" oneline contained containedin=albatrossLinkPathWithName
+syntax region albatrossLinkPathWithName start=/{/ end=/)}/ oneline keepend contains=albatrossLinkPathWithNameEntry,albatrossLinkPathWithNameTitle
+
+highlight link albatrossLinkPathWithNameEntry Underlined
+highlight link albatrossLinkPathWithNameTitle Underlined
+highlight link albatrossLinkPathWithName Underlined
+
+" Having some trouble with the links with names. How it should be parsed:
+"
+" {{food/pizza}(Pizza)}   or  [[Pizza](Alternative name)]
+" |^^^^^^^^^^^ ^^^^^^^|
+" |      |        |   |
+" |    entry      |   |
+" |             title |
+" |                   |
+" \-----withName------/
+"
+" How it is actually being parsed:
+"
+" {{food/pizza}(Pizza)}   or  [[Pizza](Alternative name)]
+" |^^^^^^^^^^^| ^^^^^ |
+" |      |    |    |  |
+" |    entry  |    |  |
+" |           |  title|
+" |           |       |
+" \-----withName------/
+"
+" The difference is kind of hard to see in such a rubbish diagram. Basically, the second "{" is being matched correctly as the entry
+" as it should, but the final one still belongs to the overall link. For the title, both brackets "(" and ")" are being highlighted as
+" part of the overall link whereas they should be highlighted like the title.
+" Since at the moment it's purely cosmetic, it can be solved by setting all the regions to the same highlighting group like so:
+"
+"  highlight link albatrossLinkPathWithNameEntry Underlined
+"  highlight link albatrossLinkPathWithNameTitle Underlined
+"  highlight link albatrossLinkPathWithName Underlined
+"
+" But to easily see the problem, it's better to set them to three different highlighting groups:
+"
+"  highlight link albatrossLinkPathWithNameEntry Type
+"  highlight link albatrossLinkPathWithNameTitle Statement
+"  highlight link albatrossLinkPathWithName Error
+
+syntax cluster albatrossLinks contains=albatrossLinkNoName,albatrossLinkWithName,albatrossLinkPathNoName,albatrossLinkPathWithName
+
+" Tags
+" -----
+
+syntax match albatrossBuiltinTag /@!\S\+/
+syntax match albatrossCustomTag /@?\S\+/
+
+highlight link albatrossBuiltinTag Type
+highlight link albatrossCustomTag Type
+
+syntax cluster albatrossTags contains=albatrossBuiltinTag,albatrossCustomTag
+
+" Finally...
+" ---------
+
+" This cluster is appended to the mkdNonListItem later on.
+syntax cluster albatrossSyntax contains=@albatrossLinks,@albatrossTags
+
+" ---------------------------
+" Albatross Stuff ends here
+" ---------------------------
+
 " YAML frontmatter
 if get(g:, 'vim_markdown_frontmatter', 0)
   syn include @yamlTop syntax/yaml.vim
@@ -155,7 +260,10 @@ if get(g:, 'vim_markdown_strikethrough', 0)
     HtmlHiLink mkdStrike        htmlStrike
 endif
 
-syn cluster mkdNonListItem contains=@htmlTop,htmlItalic,htmlBold,htmlBoldItalic,mkdFootnotes,mkdInlineURL,mkdLink,mkdLinkDef,mkdLineBreak,mkdBlockquote,mkdCode,mkdRule,htmlH1,htmlH2,htmlH3,htmlH4,htmlH5,htmlH6,mkdMath,mkdStrike
+" Albatross: Note the addition of the @albatrossSyntax cluster at the end.
+syn cluster mkdNonListItem contains=@htmlTop,htmlItalic,htmlBold,htmlBoldItalic,mkdFootnotes,mkdInlineURL,mkdLink,mkdLinkDef,mkdLineBreak,mkdBlockquote,mkdCode,mkdRule,htmlH1,htmlH2,htmlH3,htmlH4,htmlH5,htmlH6,mkdMath,mkdStrike,@albatrossSyntax
+" Original:
+" syn cluster mkdNonListItem contains=@htmlTop,htmlItalic,htmlBold,htmlBoldItalic,mkdFootnotes,mkdInlineURL,mkdLink,mkdLinkDef,mkdLineBreak,mkdBlockquote,mkdCode,mkdRule,htmlH1,htmlH2,htmlH3,htmlH4,htmlH5,htmlH6,mkdMath,mkdStrike
 
 "highlighting for Markdown groups
 HtmlHiLink mkdString        String

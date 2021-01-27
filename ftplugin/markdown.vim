@@ -649,16 +649,152 @@ function! s:Markdown_GetUrlForPosition(lnum, col)
     return getline(l:lnum)[l:left - 1 : l:right - 1]
 endfunction
 
+" Albatross: Get's the name of an entry that the cursor is over.
+function! s:Markdown_GetEntryNameForPosition(lnum, col)
+    let l:lnum = a:lnum
+    let l:col = a:col
+    let l:syn = synIDattr(synID(l:lnum, l:col, 1), 'name')
+
+    if l:syn ==# 'albatrossLinkNoName'
+    else
+        return ''
+    endif
+
+    let [l:left, l:right] = <sid>FindCornersOfSyntax(l:lnum, l:col)
+    return getline(l:lnum)[l:left + 1 : l:right - 3]
+endfunction
+
+" Albatross: Get's the path to the entry that the cursor is over.
+function! s:Markdown_GetEntryPathForPosition(lnum, col)
+    let l:lnum = a:lnum
+    let l:col = a:col
+    let l:syn = synIDattr(synID(l:lnum, l:col, 1), 'name')
+
+    if l:syn ==# 'albatrossLinkPathNoName'
+    else
+        return ''
+    endif
+
+    let [l:left, l:right] = <sid>FindCornersOfSyntax(l:lnum, l:col)
+    return getline(l:lnum)[l:left + 1 : l:right - 3]
+endfunction
+
+" Albatross: Given an entry name, this will open it.
+" We need a definition guard since this command will be invoked again.
+if !exists('*s:Albatross_OpenEntryFromEntryName')
+    function! s:Albatross_OpenEntryFromEntryName(entryname)
+        let l:entryname = a:entryname
+
+        if l:entryname == ''
+            echom "(vim-albatross) ERROR: Cannot open an entry with an empty name."
+            return ''
+        endif
+
+        let l:path = trim(system("albatross vim open --title '" . l:entryname . "'"))
+
+        if l:path =~ "ERROR"
+            echom "(vim-albatross) " . l:path
+            return ''
+        " At the moment we don't print INFO messages. I haven't found a way of adding this which doesn't block or makes the messages
+        " actually show up
+        " elseif l:output =~ "INFO"      
+        "     echom "(vim-albatross) " . l:output
+        endif
+
+        execute 'tabedit' l:path
+        let l:currfile = @%
+        execute 'au BufWinLeave,VimLeave <buffer> call s:CloseEntryFromTempPath("' . l:path . '")'
+    endfunction
+endif
+
+" Albatross: Given an entry path, this will open it.
+" We need a definition guard since this command will be invoked again.
+if !exists('*s:Albatross_OpenEntryFromEntryPath')
+    function! s:Albatross_OpenEntryFromEntryPath(entrypath)
+        let l:entrypath = a:entrypath
+
+        if l:entrypath == ''
+            echom "(vim-albatross) ERROR: Cannot open an entry with an empty path."
+            return ''
+        endif
+
+        let l:path = trim(system("albatross vim open --path '" . l:entrypath . "'"))
+
+        if l:path =~ "ERROR"
+            echom "(vim-albatross) " . l:path
+            return ''
+        " At the moment we don't print INFO messages. I haven't found a way of adding this which doesn't block or makes the messages
+        " actually show up
+        " elseif l:output =~ "INFO"      
+        "     echom "(vim-albatross) " . l:output
+        endif
+
+        execute 'tabedit' l:path
+        let l:currfile = @%
+        execute 'au BufWinLeave,VimLeave <buffer> call s:CloseEntryFromTempPath("' . l:path . '")'
+    endfunction
+endif
+
+" Albatross: Given the path to a temporary file, this will call the correct 'albatross vim' command
+" and check for errors.
+" We need a definition guard.
+if !exists('*s:CloseEntryFromTempPath')
+    function! s:CloseEntryFromTempPath(temppath)
+        let l:temppath = a:temppath
+
+        if l:temppath == ''
+            echom "(vim-albatross) ERROR: Can't close a temporary entry with a blank path."
+            return ''
+        endif
+
+        let l:output = trim(system("albatross vim close --path '" . l:temppath . "'"))
+
+        if l:output =~ "ERROR"
+            echom "(vim-albatross) " . l:output
+            return ''
+        " At the moment we don't print INFO messages. I haven't found a way of adding this which doesn't block or makes the messages
+        " actually show up
+        " elseif l:output =~ "INFO"      
+        "     echom "(vim-albatross) " . l:output
+        endif
+    endfunction
+endif
+
+" Albatross: Given 
+
 " Front end for GetUrlForPosition.
 "
-function! s:OpenUrlUnderCursor()
-    let l:url = s:Markdown_GetUrlForPosition(line('.'), col('.'))
-    if l:url != ''
-        call s:VersionAwareNetrwBrowseX(l:url)
-    else
-        echomsg 'The cursor is not on a link.'
-    endif
-endfunction
+" Albatross: We need to augment this to allow opening entries.
+" Albatross: We also need to add a definition guard since opening a new markdown file
+"            will reload this plugin and attempt to redefine it.
+" Maybe attempt opening the tab in Vim first and then try make it Vimscript here?
+" <afile> is the current path
+if !exists('*s:OpenUrlUnderCursor')
+    function! s:OpenUrlUnderCursor()
+        let l:url = s:Markdown_GetUrlForPosition(line('.'), col('.'))
+        if l:url != ''
+            call s:VersionAwareNetrwBrowseX(l:url)
+        else
+            let l:entryname = s:Markdown_GetEntryNameForPosition(line('.'), col('.'))
+            
+            if l:entryname != ''
+                " [[entryname]]
+                call s:Albatross_OpenEntryFromEntryName(l:entryname)
+                return ''
+            endif
+
+            let l:entrypath = s:Markdown_GetEntryPathForPosition(line('.'), col('.'))
+
+            if l:entrypath != ''
+                " {{path/to/entry}}
+                call s:Albatross_OpenEntryFromEntryPath(l:entrypath)
+                return ''
+            endif
+
+            echo 'The cursor is not on a link or an entry.'
+        endif
+    endfunction
+endif
 
 " We need a definition guard because we invoke 'edit' which will reload this
 " script while this function is running. We must not replace it.
