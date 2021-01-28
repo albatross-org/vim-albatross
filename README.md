@@ -7,6 +7,8 @@ This repository contains a forked version of [plasticboy's `vim-markdown`](https
 ## Installation
 This plugin relies on the command line tool part of [`go-albatross`](https://github.com/albatross-org/go-albatross/tree/master/cmd/albatross). If it hasn't already been installed, see the [installation instructions](https://github.com/albatross-org/go-albatross/tree/master/cmd/albatross#setup)
 
+This plugin also relies on [`fzf.vim`](https://github.com/junegunn/fzf.vim) to quickly search entries.
+
 You can check if a working version of `go-albatross` is installed if the command `albatross vim` has output.
 
 ### Vundle
@@ -37,6 +39,14 @@ Open an entry like you normally do using Albatross:
 $ albatross get -p path/to/entry
 ```
 
+To add a command for opening entries using the `<leader>` (in my case `;`) and the `e` character:
+
+```
+map <leader>e :call Albatross_SelectEntry()<CR>
+```
+
+For all functions available, see [Functions](#functions).
+
 ## Features
 - [X] Open entries in a new tab using the `gx` command.
 - [X] Syntax highlighting of all types of links: `[[Links by Titles]]`, `{{links/by/paths}}`, `[[Links by Title](with link text)]`, `{{links/by/path}(with link text)}`
@@ -45,6 +55,14 @@ $ albatross get -p path/to/entry
 - [ ] Open a completely new entry without having to link to it (ideally like [`fzf-vim`](https://github.com/junegunn/fzf.vim))
 - [ ] Create a new entry from within Vim.
 - [ ] Customise the Albatross command used internally to allow different stores.
+- [ ] Very inflexible, at the moment opens tabs only.
+- [ ] Would be good to have default keymaps.
+
+## Functions
+|Function|Purpose|
+|--------|-------|
+|`Albatross_OpenEntryFromEntryName`|Opens the entry with the given name.|
+|`Albatross_OpenEntryFromEntryPath`|Opens the entry with the given path.|
 
 ## Bugs
 - [ ] I'm not very good with Vimscript which is the biggest reason this is a fork rather than a plugin from the ground up. It's very messy and not idiomatic at all.

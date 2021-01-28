@@ -681,8 +681,8 @@ endfunction
 
 " Albatross: Given an entry name, this will open it.
 " We need a definition guard since this command will be invoked again.
-if !exists('*s:Albatross_OpenEntryFromEntryName')
-    function! s:Albatross_OpenEntryFromEntryName(entryname)
+if !exists('*Albatross_OpenEntryFromEntryName')
+    function! Albatross_OpenEntryFromEntryName(entryname)
         let l:entryname = a:entryname
 
         if l:entryname == ''
@@ -709,8 +709,8 @@ endif
 
 " Albatross: Given an entry path, this will open it.
 " We need a definition guard since this command will be invoked again.
-if !exists('*s:Albatross_OpenEntryFromEntryPath')
-    function! s:Albatross_OpenEntryFromEntryPath(entrypath)
+if !exists('*Albatross_OpenEntryFromEntryPath')
+    function! Albatross_OpenEntryFromEntryPath(entrypath)
         let l:entrypath = a:entrypath
 
         if l:entrypath == ''
@@ -779,7 +779,7 @@ if !exists('*s:OpenUrlUnderCursor')
             
             if l:entryname != ''
                 " [[entryname]]
-                call s:Albatross_OpenEntryFromEntryName(l:entryname)
+                call Albatross_OpenEntryFromEntryName(l:entryname)
                 return ''
             endif
 
@@ -787,7 +787,7 @@ if !exists('*s:OpenUrlUnderCursor')
 
             if l:entrypath != ''
                 " {{path/to/entry}}
-                call s:Albatross_OpenEntryFromEntryPath(l:entrypath)
+                call Albatross_OpenEntryFromEntryPath(l:entrypath)
                 return ''
             endif
 
@@ -795,6 +795,22 @@ if !exists('*s:OpenUrlUnderCursor')
         endif
     endfunction
 endif
+
+" Albatross: ParseEntrySelection takes a string from the selection window (a title and path seperated by a tab)
+" and will open it.
+function! Albatross_ParseEntrySelection(selection)
+	call Albatross_OpenEntryFromEntryPath(split(a:selection, "\t")[-1])
+endfunction
+
+" Albatross: SelectEntry lets you select an entry from its title or path.
+function! Albatross_SelectEntry()
+	call fzf#run({ 'source': 'albatross get --sort date --rev template ''{{.Title}}	{{.Path}}''', 'sink': function('Albatross_ParseEntrySelection')})
+endfunction
+
+" Albatross: SelectEntry lets you select an entry from its title or path.
+function! Albatross_SelectEntryCustomFilter(filter)
+	call fzf#run({ 'source': 'albatross get --sort date --rev ' . a:filter . ' template ''{{.Title}}	{{.Path}}''', 'sink': function('Albatross_ParseEntrySelection')})
+endfunction
 
 " We need a definition guard because we invoke 'edit' which will reload this
 " script while this function is running. We must not replace it.
