@@ -50,19 +50,24 @@ For all functions available, see [Functions](#functions).
 ## Features
 - [X] Open entries in a new tab using the `gx` command.
 - [X] Syntax highlighting of all types of links: `[[Links by Titles]]`, `{{links/by/paths}}`, `[[Links by Title](with link text)]`, `{{links/by/path}(with link text)}`
-- [X] Syntax highlihgting for all types of tags: `@?tag` and `@!tag` 
+- [X] Syntax highlihgting for all types of tags: `@?tag` and `@!tag`
+- [X] Open entries quickly with `Albatross_SelectEntry`.
+- [X] Open entries matching certain criteria with `Albatross_SelectEntryWithFilter`
 - [ ] See backlinks to the current entry.
 - [ ] Open a completely new entry without having to link to it (ideally like [`fzf-vim`](https://github.com/junegunn/fzf.vim))
 - [ ] Create a new entry from within Vim.
 - [ ] Customise the Albatross command used internally to allow different stores.
 - [ ] Very inflexible, at the moment opens tabs only.
 - [ ] Would be good to have default keymaps.
+- [ ] Command for quickly inserting a link.
 
 ## Functions
-|Function|Purpose|
-|--------|-------|
-|`Albatross_OpenEntryFromEntryName`|Opens the entry with the given name.|
-|`Albatross_OpenEntryFromEntryPath`|Opens the entry with the given path.|
+|Function|Purpose|Example|
+|--------|-------|-------|
+|`Albatross_OpenEntryFromEntryName(entryname)`|Opens the entry with the given name.|`Albatross_OpenEntryFromEntryName("Meditations on Pizza")`|
+|`Albatross_OpenEntryFromEntryPath(entrypath)`|Opens the entry with the given path.|`Albatross_OpenEntryFromEntryPath("food/pizza")`|
+|`Albatross_SelectEntry()`|Opens a [fzf](https://github.com/junegunn/fzf) window with a list of entries.|`map <leader>e :call Albatross_SelectEntry()<CR>`|
+|`Albatross_SelectEntryWithFilter(filter...)`|Opens a [fzf](https://github.com/junegunn/fzf) window with a list of entries matching the given filter, specified as arguments to the `albatross get` command.|`map <leader>e :call Albatross_SelectEntryWithFilter("--path school")<CR>` (shows list containing entries matching `albatross get --path "school"`|
 
 ## Bugs
 - [ ] I'm not very good with Vimscript which is the biggest reason this is a fork rather than a plugin from the ground up. It's very messy and not idiomatic at all.
