@@ -690,7 +690,7 @@ if !exists('*Albatross_OpenEntryFromEntryName')
             return ''
         endif
 
-        let l:path = trim(system("albatross vim open --title '" . l:entryname . "'"))
+        let l:path = trim(system('albatross vim open --title "' . l:entryname . '"'))
 
         if l:path =~ "ERROR"
             echom "(vim-albatross) " . l:path
@@ -718,7 +718,7 @@ if !exists('*Albatross_OpenEntryFromEntryPath')
             return ''
         endif
 
-        let l:path = trim(system("albatross vim open --path '" . l:entrypath . "'"))
+        let l:path = trim(system('albatross vim open --path "' . l:entrypath . '"'))
 
         if l:path =~ "ERROR"
             echom "(vim-albatross) " . l:path
@@ -747,7 +747,7 @@ if !exists('*s:CloseEntryFromTempPath')
             return ''
         endif
 
-        let l:output = trim(system("albatross vim close --path '" . l:temppath . "'"))
+        let l:output = trim(system('albatross vim close --path "' . l:temppath . '"'))
 
         if l:output =~ "ERROR"
             echom "(vim-albatross) " . l:output

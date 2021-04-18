@@ -72,6 +72,7 @@ For all functions available, see [Functions](#functions).
 ## Bugs
 - [ ] I'm not very good with Vimscript which is the biggest reason this is a fork rather than a plugin from the ground up. It's very messy and not idiomatic at all.
 - [ ] Links aren't parsed quite correctly, edge cases like `[[Entry With (Brackets in Name)]]` and links with different link text aren't parsed quite right, though the syntax is highlighted correctly.
+- [ ] Not secure: a specially named entry could be used to execute arbitrary system commands when you attempt to open it.
 
 ## How it Works
 The Albatross client isn't actually implemented in Vimscript -- it communicates with `go-albatross` through the `albatross vim` command. For more information on how it works, see `albatross vim --help`.
